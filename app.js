@@ -30,15 +30,18 @@ app.get("/api/posts", veri , async (req, res) => {
   const listOfTags = req.query.tags
   const arrayOfTags = listOfTags.split(",")
   
-  async function get_request(thisTag) {
-    console.log(url + "?tag=" + thisTag)
-    const res = await fetch(url + "?tag=" + thisTag);
+  // async function get_request(thisTag) {
+  //   console.log(url + "?tag=" + thisTag)
+  //   const res = await fetch(url + "?tag=" + thisTag);
+  //   const data = await res.json(); //assuming data is json
+  //   return data
+  // }
+  
+  const getAllResults = arrayOfTags.map(async tag => {
+    const res = await fetch(url + "?tag=" + tag);
     const data = await res.json(); //assuming data is json
-    return data
-  }
-
-  const getAllResults = arrayOfTags.map(tag => {
-    return get_request(tag)
+    console.log(data.posts)
+    return data.posts
   })
 
   // clean up. remove replicates
