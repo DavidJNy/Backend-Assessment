@@ -3,6 +3,7 @@ const app = express();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 let url = 'https://api.hatchways.io/assessment/blog/posts';
+let testURL = 'https://api.hatchways.io/assessment/blog/posts?tag=tech'
 
 const sortByOptions = ['', 'id', 'reads', 'likes', 'popularity'];
 const direct = ['', 'desc', 'asc'];
@@ -30,24 +31,29 @@ app.get("/api/posts", veri , async (req, res) => {
   const listOfTags = req.query.tags
   const arrayOfTags = listOfTags.split(",")
   
-  // async function get_request(thisTag) {
-  //   console.log(url + "?tag=" + thisTag)
-  //   const res = await fetch(url + "?tag=" + thisTag);
-  //   const data = await res.json(); //assuming data is json
-  //   return data
-  // }
-  
-  const getAllResults = arrayOfTags.map(async tag => {
-    const res = await fetch(url + "?tag=" + tag);
-    const data = await res.json(); //assuming data is json
-    console.log(data.posts)
-    return data.posts
-  })
+  var getJson = await fetch(testURL)
+    .then(data => data.json())
+    .then(poo => { return poo; })
+    .catch((err) => {
+      console.log(err.message);
+    })
+
+  console.log(getJson)
+
+
+  // var getAllResults = arrayOfTags.map(async tag => {
+  //   const resp = await fetch(url + "?tag=" + tag);
+  //   const data = await resp.json(); //assuming data is json
+  //   // console.log(data.posts)
+  //   return data.posts
+  // })
+
+  // console.log(get_request("tech") + "console outside fxn")
 
   // clean up. remove replicates
   // sort and direction here after getting all the API request
   
-  res.send(getAllResults).status(200);
+  res.send(getJson).status(200);
   }
 )
 
