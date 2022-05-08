@@ -31,29 +31,35 @@ app.get("/api/posts", veri , async (req, res) => {
   const listOfTags = req.query.tags
   const arrayOfTags = listOfTags.split(",")
   
-  var getJson = await fetch(testURL)
-    .then(data => data.json())
-    .then(poo => { return poo; })
-    .catch((err) => {
-      console.log(err.message);
-    })
 
-  console.log(getJson)
+  // var getJson = await fetch(url + "?tag=" + "tech")
+  //   .then(data => data.json())
+  //   .then(poo => { return poo.posts; })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   })
 
+  // console.log(getJson)
+  
+  console.log(arrayOfTags)
 
-  // var getAllResults = arrayOfTags.map(async tag => {
-  //   const resp = await fetch(url + "?tag=" + tag);
-  //   const data = await resp.json(); //assuming data is json
-  //   // console.log(data.posts)
-  //   return data.posts
-  // })
+  var getAllResults = (arrayOfTags.map(async tag => {
+    const lastPost = await fetch(url + "?tag=" + tag)
+      .then(data => data.json())
+      .then(poo => { return poo.posts })
+      .catch((err) => {
+        console.log(err.message);
+      })
+    return lastPost
+  }))
+
 
   // console.log(get_request("tech") + "console outside fxn")
 
   // clean up. remove replicates
   // sort and direction here after getting all the API request
   
-  res.send(getJson).status(200);
+  res.json(getAllResults).status(200);
   }
 )
 
