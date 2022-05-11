@@ -8,7 +8,19 @@ let testURL = 'https://api.hatchways.io/assessment/blog/posts?tag=tech'
 const sortByOptions = ['', 'id', 'reads', 'likes', 'popularity'];
 const direct = ['', 'desc', 'asc'];
 
-function veri (req, res, next) {
+async function fetchStuff(e) {
+    let results = await fetch(url + '?tag=' + e)
+      .then(data => {
+        return data.json()
+      })
+      .then(poo => { return poo.posts } )
+      .catch((err) => {
+        console.log(err.message);
+      })
+    return results;
+}
+
+function verifyTag (req, res, next) {
   var {tags, sortBy, direction } = req.query;
   if (tags === undefined ) {
     res.status(400).json({ error: "Tags parameter is required" })
@@ -27,34 +39,37 @@ app.get("/api/ping", (req, res) => {
   res.status(200).json({ success: "true"});
 })
 
-app.get("/api/posts", veri , async (req, res) => {
+app.get("/api/posts", verifyTag, async (req, res) => {
   const listOfTags = req.query.tags
   const arrayOfTags = listOfTags.split(",")
-  
-  var getJson = await fetch(testURL)
-    .then(data => data.json())
-    .then(poo => { return poo; })
-    .catch((err) => {
-      console.log(err.message);
-    })
 
-  console.log(getJson)
+  Promise.all(arrayOfTags.map( e => {
+    var allResults = fetchStuff(e)
+    return allResults
+  })).then(everyThing => {
+    let listOfObjects = []
+    for (const bigPoo of everyThing) {
+      for (const smallPoo of bigPoo) {
+        listOfObjects.push(smallPoo)
+      }
+    }
+    // clean up. remove replicates
+    
+    // obj.arr = obj.arr.filter((value, index, self) =>
+    //   index === self.findIndex((t) => (
+    //     t.place === value.place && t.name === value.name
+    //   ))
+    // )
 
+    // sort and direction here after getting all the API request
 
-  // var getAllResults = arrayOfTags.map(async tag => {
-  //   const resp = await fetch(url + "?tag=" + tag);
-  //   const data = await resp.json(); //assuming data is json
-  //   // console.log(data.posts)
-  //   return data.posts
-  // })
-
-  // console.log(get_request("tech") + "console outside fxn")
-
-  // clean up. remove replicates
-  // sort and direction here after getting all the API request
-  
-  res.send(getJson).status(200);
-  }
-)
+    
+    return listOfObjects
+  })
+  .then(results => { res.send(results).status(200); })
+  .catch((err) => {
+    console.log(err.message);
+  })
+})
 
 app.listen(5000)

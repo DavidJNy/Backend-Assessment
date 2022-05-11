@@ -2,58 +2,106 @@ const express = require('express');
 const app = express();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-const success = {success : true};
-const needSort = {error: "sortBy parameter is invalid"};
-const needDirection = {error: "direction parameter is invalid"};
-
 let url = 'https://api.hatchways.io/assessment/blog/posts';
+let testURL = 'https://api.hatchways.io/assessment/blog/posts?tag=tech'
 
-// Here is what you will need to do to complete this task:
-// ● For every tag specified in the tags parameter, fetch the posts with that tag using
-// the Hatchways API(make a separate API request for every tag specified)
-// ● Combine all the results from the API requests above and remove all the repeated
-// posts(try to be efficient when doing this)
-// ● You will get a better score on our assessment if you can make concurrent
-// requests to the API(making the requests in parallel)(we understand that this job
-// is easier in some languages vs.others)
+const sortByOptions = ['', 'id', 'reads', 'likes', 'popularity'];
+const direct = ['', 'desc', 'asc'];
 
+async function fetchStuff(e) {
+    let results = await fetch(url + '?tag=' + e)
+      .then(data => {
+        return data.json()
+      })
+      .then(poo => { return poo.posts } )
+      .catch((err) => {
+        console.log(err.message);
+      })
+    return results;
+}
 
-const verify = async function  (req, res, next) {
-    var {tags, sortBy, direction } = req.query;
-    console.log(req.query.tags);
-    console.log(req.query);
-    if (tags === undefined) {
-      next();
-    }
-    else {
-      
-      next();
-    }
+function verifyTag (req, res, next) {
+  var {tags, sortBy, direction } = req.query;
+  if (tags === undefined ) {
+    res.status(400).json({ error: "Tags parameter is required" })
+    return
+  } else if (sortBy !== undefined && sortByOptions.includes(sortBy) === false) {
+    res.status(400).json({ error: "sortBy parameter is invalid" })
+    return
+  } else if (direction !== undefined && direct.includes(direction) === false) {
+    res.status(400).send({ error: "direction parameter is invalid" })
+    return
+  }
+  next()
 }
 
 app.get("/api/ping", (req, res) => {
-  res.status(200).send(success);
-  res.end;
+  res.status(200).json({ success: "true"});
 })
 
-app.get("/api/posts", verify , async (req, res) => {
+app.get("/api/posts", verifyTag, async (req, res) => {
+  const listOfTags = req.query.tags
+  const arrayOfTags = listOfTags.split(",")
 
+  Promise.all(arrayOfTags.map( e => {
+    var allResults = fetchStuff(e)
+    return allResults
+  })).then(everyThing => {
+    
+    // clean up. remove replicates
+  // sort and direction here after getting all the API request
+  })
+  .then(results => { res.send(results).status(200); })
   
-  var getJson = await fetch(url)
-    .then(data => data.json())
-    .then(poo => {return poo;})
-    .catch((err) => {
-      console.log(err.message);
-    })
+
+  // clean up. remove replicates
+  // sort and direction here after getting all the API request
   
-  
-    // sort and direction here after getting all the API request
-  res.send(getJson);
-  res.status(200);
-  res.end();
   }
 )
 
+app.listen(5000)
 
-app.listen(3000)
+//Notes
 
+// let userToken = AuthUser(data)
+// console.log(userToken) // Promise { <pending> }
+
+
+
+// userToken.then(function (result) {
+//   console.log(result) // "Some User token"
+// })
+
+
+
+// let getJson1 = await getStuff('tech').then(data => {return data}) 
+
+
+//THIS WORKS DON"T TOUCH IT!!!!!!!!!!!!!!!!
+  // async function getStuff (e) {
+  //   // console.log(url + '?tag=' + e)
+  //   let results = await fetch(url + '?tag=' + e)
+  //     .then(data => {
+  //       // console.log(data);
+  //       return data.json()
+  //     })
+  //     .then(poo => { return poo.posts } )
+  //     .catch((err) => {
+  //       console.log(err.message);
+  //     })
+  //     // console.log(results)
+  //   return results;
+  //   // array
+  // }
+  // //THIS WORKS DON"T TOUCH IT!!!!!!!!!!!!!!!! 
+
+
+  // THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // var getJson1 = await fetch(testURL)
+  //   .then(data => data.json())
+  //   .then(poo => { return poo; })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   })
+  // THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
