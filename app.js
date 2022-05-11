@@ -42,6 +42,7 @@ app.get("/api/ping", (req, res) => {
 app.get("/api/posts", verifyTag, async (req, res) => {
   const listOfTags = req.query.tags
   const arrayOfTags = listOfTags.split(",")
+<<<<<<< HEAD
 
   Promise.all(arrayOfTags.map( e => {
     var allResults = fetchStuff(e)
@@ -71,5 +72,39 @@ app.get("/api/posts", verifyTag, async (req, res) => {
     console.log(err.message);
   })
 })
+=======
+  
+
+  // var getJson = await fetch(url + "?tag=" + "tech")
+  //   .then(data => data.json())
+  //   .then(poo => { return poo.posts; })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   })
+
+  // console.log(getJson)
+  
+  console.log(arrayOfTags)
+
+  var getAllResults = (arrayOfTags.map(async tag => {
+    const lastPost = await fetch(url + "?tag=" + tag)
+      .then(data => data.json())
+      .then(poo => { return poo.posts })
+      .catch((err) => {
+        console.log(err.message);
+      })
+    return lastPost
+  }))
+
+
+  // console.log(get_request("tech") + "console outside fxn")
+
+  // clean up. remove replicates
+  // sort and direction here after getting all the API request
+  
+  res.json(getAllResults).status(200);
+  }
+)
+>>>>>>> 93f5606e9494c492cae7588c44eaaded321a211c
 
 app.listen(5000)
