@@ -46,25 +46,41 @@ app.get("/api/posts", verifyTag, async (req, res) => {
   Promise.all(arrayOfTags.map( e => {
     var allResults = fetchStuff(e)
     return allResults
-  })).then(everyThing => {
+  }))
+  .then(everyThing => {
     let listOfObjects = []
     for (const bigPoo of everyThing) {
       for (const smallPoo of bigPoo) {
         listOfObjects.push(smallPoo)
       }
     }
-    // clean up. remove replicates
-    
-    // obj.arr = obj.arr.filter((value, index, self) =>
-    //   index === self.findIndex((t) => (
-    //     t.place === value.place && t.name === value.name
-    //   ))
-    // )
+    const cleanObjects = Array.from(new Set(listOfObjects.map(a => a.id)))
+      .map(id => {
+        return listOfObjects.find(a => a.id === id)
+      })
+      return cleanObjects    
+  })
+  .then(preSortObj => {
+    let finalProduct
+    var { sortBy, direction } = req.query;
 
-    // sort and direction here after getting all the API request
+    finalProduct = preSortObj.sort((a,b) => {
+      return a.id - b.id
+    })
 
-    
-    return listOfObjects
+    if ( sortBy !== undefined) {
+
+      finalProduct = preSortObj.sort((a, b) => {
+
+        return a[sortBy] - b[sortBy]
+      })
+    }
+
+    if ( direction == 'desc') {
+      Array.prototype.reverse.call(finalProduct)
+    }
+
+    return finalProduct
   })
   .then(results => { res.send(results).status(200); })
   .catch((err) => {
