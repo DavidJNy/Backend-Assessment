@@ -3,7 +3,6 @@ const app = express();
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 let url = 'https://api.hatchways.io/assessment/blog/posts';
-let testURL = 'https://api.hatchways.io/assessment/blog/posts?tag=tech'
 
 const sortByOptions = ['', 'id', 'reads', 'likes', 'popularity'];
 const direct = ['', 'desc', 'asc'];
@@ -21,7 +20,7 @@ async function fetchStuff(e) {
 }
 
 function verifyTag (req, res, next) {
-  var {tags, sortBy, direction } = req.query;
+  let {tags, sortBy, direction } = req.query;
   if (tags === undefined ) {
     res.status(400).json({ error: "Tags parameter is required" })
     return
@@ -44,7 +43,7 @@ app.get("/api/posts", verifyTag, async (req, res) => {
   const arrayOfTags = listOfTags.split(",")
 
   Promise.all(arrayOfTags.map( e => {
-    var allResults = fetchStuff(e)
+    let allResults = fetchStuff(e)
     return allResults
   }))
   .then(everyThing => {
@@ -62,7 +61,7 @@ app.get("/api/posts", verifyTag, async (req, res) => {
   })
   .then(preSortObj => {
     let finalProduct
-    var { sortBy, direction } = req.query;
+    let { sortBy, direction } = req.query;
 
     finalProduct = preSortObj.sort((a,b) => {
       return a.id - b.id
